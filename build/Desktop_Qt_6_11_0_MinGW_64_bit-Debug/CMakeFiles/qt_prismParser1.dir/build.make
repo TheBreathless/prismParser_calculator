@@ -150,7 +150,10 @@ qt_prismParser1.exe: CMakeFiles/qt_prismParser1.dir/main.cpp.obj
 qt_prismParser1.exe: CMakeFiles/qt_prismParser1.dir/mainwindow.cpp.obj
 qt_prismParser1.exe: CMakeFiles/qt_prismParser1.dir/math.cpp.obj
 qt_prismParser1.exe: CMakeFiles/qt_prismParser1.dir/build.make
+qt_prismParser1.exe: C:/Qt/6.11.0/mingw_64/lib/libQt6MultimediaWidgets.a
 qt_prismParser1.exe: C:/Qt/6.11.0/mingw_64/lib/libQt6Widgets.a
+qt_prismParser1.exe: C:/Qt/6.11.0/mingw_64/lib/libQt6Multimedia.a
+qt_prismParser1.exe: C:/Qt/6.11.0/mingw_64/lib/libQt6Network.a
 qt_prismParser1.exe: C:/Qt/6.11.0/mingw_64/lib/libQt6Gui.a
 qt_prismParser1.exe: C:/Qt/6.11.0/mingw_64/lib/libQt6Core.a
 qt_prismParser1.exe: C:/Qt/6.11.0/mingw_64/lib/libQt6EntryPoint.a

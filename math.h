@@ -7,6 +7,11 @@
 #include <QMessageBox>
 #include <QMessageBox.h>
 
+#include <QMediaPlayer>
+#include <QVideoWidget>
+#include <QAudioOutput>
+#include <QFileInfo>
+
 #include <vector>
 #include <fstream>
 
@@ -14,8 +19,6 @@
 #include <cctype>
 #include <string>
 
-
-//#define INDEX_MAX 64    //Max operations that can be performed in a single '=' press. Was used by iteration 5, but it's now obsolete
 
 class Math: public QObject
 {
@@ -26,14 +29,6 @@ public:
 
     explicit Math(QObject *parent = nullptr);
 
-    void simpleMath();      //Same as testCalculateResult(), but for future versions
-    void advancedMath();    //Future implementation of scientific calculator
-
-    QString subCalculation(QString string);
-    QString subResult(QString string);
-
-    void testCalculateResult();     //Calculate results, only for debug
-
 public slots:
     void on_pushButton_released(char value);    //One of the QPushButton has been pressed, value is the identifier of that button
     void specialToggled();
@@ -43,35 +38,26 @@ signals:
     void scientificToggled(bool scientific);
 
 private:
+    void testCalculateResult();     //Calculate results, only for debug //Update: its used for sequential operations
+
     void registerCalculation(char value);   //Used for default calculator mode, saves all values into registers
     void stringCalculation(char value);     //>> for scientific >> mode, currently not finished
 
+    void clearLast();   //Clean last char
+    void clearAll();    //Reset all registers and variables, both for scientific and non scientific mode
 
-    void clearLast();
-    void clearAll();
-
-    //Msg boxes
-    void msgCatanzaro();
-    void msgSubscription();
-    void msgNotImplemented();
-    void msgHelp1();
-
-    bool scientific = false;
+    bool scientific = false;    //Scientific flag, determine how the operations are saved and wich algorithm will be used to evaluate them
 
     QString displayed;    //Value displayed, converted to double before being saved to a register
     QString operationString;
 
     std::vector<double> registers;  //Vector of numbers that will be calculated with this->sign;
-    std::vector<char> sign {'+'};         //Order of operations: sign[i], register[i], sign[i+1], register[i+1]...
-
-    double ah, al;      //Traditional calculator registers, but allowed only few operations without pemdas
-    double bh, bl;      //
+    std::vector<char> sign {'+'};   //The first sign is always a +. Signed operations arent supported (to write -5 you have to do +0-5)
 
     double result;      //Used by all calculator modes
 
     bool newValue = false;      //Checks if a new numeric value has been inserted or the last sign has to be changed
     bool isDecimal = false;     //Check if the value has already decimal numbers. If true, the decimal point input is ignored
-
 
 
     //Parser-related functions
@@ -84,9 +70,21 @@ private:
 
     bool isSign(char c);    //Controlla se c fa parte di un gruppo arbitrario di caratteri (i segni)
 
-    bool divByZero = false;
+    bool divByZero = false; //Division by 0 flag
     bool isValid = true;    //Usata per le corrispondenze tra parentesi
 
+    short int mismatchedP = 0;  //When a '(' is opened, this is incremented. When closed, it's decremented. If it's != 0, there is a parentesys mismatch (fix avaiable, see math.cpp)
 
+
+    //Msg boxes
+    void msgCatanzaro();
+    void msgSubscription();
+    void msgNotImplemented();
+    void msgHelp1();
+
+    //Easter eggs
+    void showEasterEgg1();
+
+    void genericVideoPlay(QString url); //Basic video player that takes an url as parameter. Display both video and audio.
 };
 #endif //MATH_H
