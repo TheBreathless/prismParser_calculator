@@ -7,6 +7,10 @@
 #include <QMessageBox>
 #include <QMessageBox.h>
 
+#include <QMediaPlayer>
+#include <QVideoWidget>
+#include <QAudioOutput>
+
 #include <vector>
 #include <fstream>
 
@@ -46,15 +50,8 @@ private:
     void registerCalculation(char value);   //Used for default calculator mode, saves all values into registers
     void stringCalculation(char value);     //>> for scientific >> mode, currently not finished
 
-
     void clearLast();
     void clearAll();
-
-    //Msg boxes
-    void msgCatanzaro();
-    void msgSubscription();
-    void msgNotImplemented();
-    void msgHelp1();
 
     bool scientific = false;
 
@@ -73,7 +70,6 @@ private:
     bool isDecimal = false;     //Check if the value has already decimal numbers. If true, the decimal point input is ignored
 
 
-
     //Parser-related functions
     double solveString(QString string);
 
@@ -88,5 +84,13 @@ private:
     bool isValid = true;    //Usata per le corrispondenze tra parentesi
 
 
+    //Msg boxes
+    void msgCatanzaro();
+    void msgSubscription();
+    void msgNotImplemented();
+    void msgHelp1();
+
+    //Easter eggs
+    void showEasterEgg1();
 };
 #endif //MATH_H

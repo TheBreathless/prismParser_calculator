@@ -66,10 +66,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateDisplay(QString content, bool scientific)
 {
-    //this->ui->lcdNumber->display(content);
-    //this->ui->calcDisplay->setText(content);
-
-
     if(!scientific)
     {
         this->ui->lcdNumberOld->display(content);
@@ -78,8 +74,6 @@ void MainWindow::updateDisplay(QString content, bool scientific)
     {
         this->ui->calcDisplay->setText(content);
     }
-
-    qDebug() << "2>Scientific flag:" << scientific;
 }
 
 void MainWindow::updateScientificMode(bool scientific)
@@ -94,6 +88,4 @@ void MainWindow::updateScientificMode(bool scientific)
         this->ui->calcDisplay->show();
         this->ui->lcdNumberOld->hide();
     }
-
-    qDebug() << "Scientific flag:" << scientific;
 }

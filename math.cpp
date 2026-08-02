@@ -5,10 +5,74 @@ Math::Math(QObject *parent): QObject(parent)    //Costruttore classe Math
 
 }
 
+void Math::on_pushButton_released(char value)
+{
+    if(!this->scientific)
+    {
+        this->registerCalculation(value);
+        emit contentUpdated(this->displayed, this->scientific);
+    }
+    else
+    {
+        this->stringCalculation(value);
+        emit contentUpdated(this->operationString, this->scientific);
+    }
+}
+
+void Math::specialToggled()
+{
+
+    if(!this->scientific)
+        this->scientific = true;
+    else
+        this->scientific = false;
+
+    emit scientificToggled(this->scientific);
+}
+
+void Math::clearLast()
+{
+    if(!scientific)
+    {
+        if(this->displayed.endsWith("."))
+            this->isDecimal = false;
+
+        this->displayed.removeLast();
+    }
+    else
+    {
+        if(this->operationString.endsWith("."))
+            this->isDecimal = false;
+
+        this->operationString.removeLast();
+
+        switch(this->operationString.back().toLatin1())
+        {
+        case '+': case '-': case '*': case '/': case '%':
+            this->newValue = true;
+            break;
+        default:
+            this->newValue = false;
+        }
+    }
+}
+
+void Math::clearAll()
+{
+    this->displayed.clear();
+    this->registers.clear();
+    this->sign.resize(1);
+    this->result = 0;
+
+    this->isDecimal = false;
+    this->newValue = false;
+
+    this->operationString.clear();
+}
+
+///Standard calculator
 void Math::testCalculateResult()
 {
-    qDebug() << "Calcolo in corso";
-
     if(this->sign.at(0) != '+' || this->sign.at(0) != '-')
         this->sign.at(0) = '+';
 
@@ -16,10 +80,6 @@ void Math::testCalculateResult()
 
     for(int i = 0; i < this->registers.size(); i++)
     {
-        qDebug() << "Ciclo numero" << i << "su " << registers.size();
-
-
-        qDebug() << "Operazione: " << result  << sign[i] << registers[i];
 
         switch(this->sign[i])
         {
@@ -49,9 +109,6 @@ void Math::testCalculateResult()
             break;
 
         default:
-            qCritical() << "Errore: eccezione non gestita";
-            qCritical() << "Indice" << i << "con segno" << this->sign[i] << "e valore" << this->registers[i];
-            result = 15000;
             std::terminate();
         }
     }
@@ -62,55 +119,6 @@ void Math::testCalculateResult()
     this->displayed.setNum(result);
 
     emit contentUpdated(this->displayed, this->scientific);
-}
-
-
-
-void Math::on_pushButton_released(char value)
-{
-    qDebug() << "Pulsante" << value << "premuto";
-
-    if(!this->scientific)
-    {
-        this->registerCalculation(value);
-        emit contentUpdated(this->displayed, this->scientific);
-    }
-    else
-    {
-        this->stringCalculation(value);
-        emit contentUpdated(this->operationString, this->scientific);
-    }
-}
-
-void Math::specialToggled()
-{
-
-    if(!this->scientific)
-        this->scientific = true;
-    else
-        this->scientific = false;
-
-    qDebug() << "Scientific flag is set to" << scientific;
-
-    emit scientificToggled(this->scientific);
-
-
-    if(1+1 == 3)  //Always false
-    {
-        this->msgNotImplemented();
-        qCritical() << "An exception has occourred. Exception thrown->1404. Further explanations below";
-        qCritical() << "Illegal access to memory: Math::scientific cannot be accessed from this position";
-        qCritical() << "To ensure memory integrity, the following changes will be reverted (bool)this->scientific = false";
-
-
-        std::fstream f("errorLog.txt", std::ios::in | std::ios::app);
-        f << "An exception was thrown, code 1404.\n";
-        f << "std::exception(1404) has beed catched\n";
-        f << "Tried to change Math::scientific, but it is private\n";
-        f << "Reverting (bool)this->scientific to 'false' (previous value = 'true')\n";
-        f << "\nEnd of report\n----------------------------------------\n";
-        f.close();
-    }
 }
 
 void Math::registerCalculation(char value)
@@ -137,10 +145,8 @@ void Math::registerCalculation(char value)
             if(this->displayed.isEmpty())
             {
                 if((this->registers.empty() && value == '+' || value == '-') && this->sign.size() == 1)
-                    //this->sign.push_back(value);
                     this->sign.at(0) = value;
                 else
-                    //this->sign.push_back('+');
                     this->sign.at(0) = '+';
             }
             else
@@ -151,8 +157,6 @@ void Math::registerCalculation(char value)
 
                     bool flag = false;
                     this->registers.push_back(this->displayed.toDouble(&flag));
-
-                    qDebug() << "Contenuto ultimo registro:" << registers.back();
 
                     if(!flag)
                         std::terminate();
@@ -185,8 +189,6 @@ void Math::registerCalculation(char value)
 
             if(!isDecimal)
                 this->displayed.append(".");
-            else
-                qDebug() << "No changes applied: the number already had a decimal point";
 
             isDecimal = true;
             break;
@@ -207,15 +209,7 @@ void Math::registerCalculation(char value)
     }
 }
 
-bool Math::isSign(char c)
-{
-    std::string validSigns = "+-*/%^()";
-
-    return validSigns.find(c) != std::string::npos;
-}
-
-
-
+///Scientific calculator
 void Math::stringCalculation(char value)
 {
     if(std::isdigit(value) || value == '(' || value == ')')
@@ -266,6 +260,9 @@ void Math::stringCalculation(char value)
         case '=':
             this->result = solveString(this->operationString);
 
+            if(this->operationString.contains("18*59") || this->operationString.contains("1062/0"))
+                showEasterEgg1();
+
             if(this->divByZero)
             {
                 this->operationString.assign("MATH ERROR: DIV BY 0");
@@ -281,13 +278,9 @@ void Math::stringCalculation(char value)
 
             emit contentUpdated(this->operationString, this->scientific);
 
-            //qDebug() << "Result: " << result;
-            //qDebug() << "String: " << displayed;
             break;
         }
     }
-
-    //qDebug() << "Stringa:" << operationString;
 }
 
 double Math::solveString(QString originalString)
@@ -316,9 +309,7 @@ double Math::solveString(QString originalString)
             else
             {
                 while(!nums.empty() && !sign.empty() && getWeight(sign.top()) >= getWeight(c))
-                {
                     topAndPop(nums, sign);
-                }
 
                 sign.push(c);
             }
@@ -334,6 +325,13 @@ double Math::solveString(QString originalString)
     return nums.top();
 }
 
+bool Math::isSign(char c)
+{
+    std::string validSigns = "+-*/%^()";
+
+    return validSigns.find(c) != std::string::npos;
+}
+
 void Math::topAndPop(std::stack<double>& nums, std::stack<char>& sign)
 {
     double a = nums.top();
@@ -342,14 +340,9 @@ void Math::topAndPop(std::stack<double>& nums, std::stack<char>& sign)
     double b = nums.top();
     nums.pop();
 
-    //qDebug() << "\n-----\nOperazione: " << a << sign.top() << b;
-
     nums.push(evaluateStep(a, b, sign.top()));
     sign.pop();
-
-    //qDebug() << "\n-----\nTop of the stack: " << nums.top() << "\n-----\n";
 }
-
 
 short int Math::getWeight(char c)
 {
@@ -408,49 +401,8 @@ double Math::evaluateStep(double a, double b, char sign)
 }
 
 
-void Math::clearLast()
-{
-    if(!scientific)
-    {
 
-        if(this->displayed.endsWith("."))
-            this->isDecimal = false;
-
-        this->displayed.removeLast();
-    }
-    else
-    {
-        if(this->operationString.endsWith("."))
-            this->isDecimal = false;
-
-        this->operationString.removeLast();
-
-
-        switch(this->operationString.back().toLatin1())
-        {
-        case '+': case '-': case '*': case '/': case '%':
-            this->newValue = true;
-            break;
-        default:
-            this->newValue = false;
-        }
-    }
-}
-
-void Math::clearAll()
-{
-    this->displayed.clear();
-    this->registers.clear();
-    this->sign.resize(1);
-    this->result = 0;
-
-    this->isDecimal = false;
-    this->newValue = false;
-
-    this->operationString.clear();
-}
-
-
+///Msg boxes
 void Math::msgCatanzaro()
 {
     QMessageBox niggaMsg(nullptr);   //Has some bugs
@@ -535,4 +487,35 @@ void Math::msgHelp1()
     msg.setDefaultButton(QMessageBox::Ok);
 
     msg.exec();
+}
+
+///Easter eggs
+void Math::showEasterEgg1()
+{
+    QMediaPlayer *player = new QMediaPlayer();
+    QVideoWidget *video = new QVideoWidget();
+    QAudioOutput *audio = new QAudioOutput();
+
+    player->setVideoOutput(video);
+    player->setAudioOutput(audio);
+    player->setSource(QUrl::fromLocalFile(".\\CalcGameReview.media"));
+
+    video->setWindowTitle("Recensione gioco \"calcolatrice\"");
+    video->setGeometry(30, 30, 640, 360);
+    video->setAttribute(Qt::WA_DeleteOnClose);
+
+    audio->setVolume(0.8);
+
+    player->play();
+    video->show();
+
+    QObject::connect(player, &QMediaPlayer::mediaStatusChanged, [video, player, audio](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::EndOfMedia) {
+            video->close();
+            player->deleteLater();
+            video->deleteLater();
+            audio->deleteLater();
+
+        }
+    });
 }
