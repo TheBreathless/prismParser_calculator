@@ -5,6 +5,79 @@ Math::Math(QObject *parent): QObject(parent)    //Costruttore classe Math
 
 }
 
+<<<<<<< Updated upstream
+=======
+void Math::on_pushButton_released(char value)
+{
+    if(!this->scientific)
+    {
+        this->registerCalculation(value);
+        emit contentUpdated(this->displayed, this->scientific);
+    }
+    else
+    {
+        this->stringCalculation(value);
+        emit contentUpdated(this->operationString, this->scientific);
+    }
+}
+
+void Math::specialToggled()
+{
+
+    if(!this->scientific)
+        this->scientific = true;
+    else
+        this->scientific = false;
+
+    emit scientificToggled(this->scientific);
+}
+
+void Math::clearLast()
+{
+    if(!scientific)
+    {
+        if(this->displayed.endsWith("."))
+            this->isDecimal = false;
+
+        this->displayed.removeLast();
+    }
+    else
+    {
+        if(!operationString.isEmpty())
+        {
+            if(this->operationString.endsWith("."))
+                this->isDecimal = false;
+
+            this->operationString.removeLast();
+
+            if(!operationString.isEmpty())
+                switch(this->operationString.back().toLatin1())
+                {
+                case '+': case '-': case '*': case '/': case '%':
+                    this->newValue = true;
+                    break;
+                default:
+                    this->newValue = false;
+                }
+        }
+    }
+}
+
+void Math::clearAll()
+{
+    this->displayed.clear();
+    this->registers.clear();
+    this->sign.resize(1);
+    this->result = 0;
+
+    this->isDecimal = false;
+    this->newValue = false;
+
+    this->operationString.clear();
+}
+
+///Standard calculator
+>>>>>>> Stashed changes
 void Math::testCalculateResult()
 {
     qDebug() << "Calcolo in corso";
@@ -266,6 +339,12 @@ void Math::stringCalculation(char value)
         case '=':
             this->result = solveString(this->operationString);
 
+<<<<<<< Updated upstream
+=======
+            if(this->operationString.contains("18*59") || this->operationString.contains("1062/0") || this->operationString.contains("1062÷0"))
+                showEasterEgg1();
+
+>>>>>>> Stashed changes
             if(this->divByZero)
             {
                 this->operationString.assign("MATH ERROR: DIV BY 0");
@@ -303,6 +382,21 @@ double Math::solveString(QString originalString)
             numBuffer += c;
         else if(std::isspace(c))
             continue;
+        else if(c == '(')
+            sign.push(c);
+        else if(c == ')')
+        {
+            if(!numBuffer.empty())
+            {
+                nums.push(std::stod(numBuffer));
+                numBuffer.clear();
+            }
+
+            while(!sign.empty() && sign.top() != '(')
+                topAndPop(nums, sign);
+
+            sign.pop();
+        }
         else
         {
             if(!numBuffer.empty())
@@ -365,7 +459,7 @@ short int Math::getWeight(char c)
         return 3;
         break;
     case '(': case ')':
-        return 4;
+        return -200;
         break;
     default:
         return 0;
@@ -528,11 +622,46 @@ void Math::msgHelp1()
     msg.setWindowTitle("Funzionalità non implementata");
 
     msg.setText("La funzionalità richiesta non esiste o non è stata implementata");
-    msg.setInformativeText("Aggiorna o riavvia l'app, altrimenti segnala il problema\nUn log contenente il report è stato generato");
+    msg.setInformativeText("La pagina di aiuto sarà disponibile entro la versione v.1.3");
 
     msg.setIcon(QMessageBox::Critical);
 
     msg.setDefaultButton(QMessageBox::Ok);
 
     msg.exec();
+<<<<<<< Updated upstream
+=======
+}
+
+///Easter eggs
+void Math::showEasterEgg1()
+{
+    QMediaPlayer *player = new QMediaPlayer();
+    QVideoWidget *video = new QVideoWidget();
+    QAudioOutput *audio = new QAudioOutput();
+
+    player->setVideoOutput(video);
+    player->setAudioOutput(audio);
+    player->setParent(video);
+    player->setSource(QUrl::fromLocalFile(".\\CalcGameReview.media"));
+
+    video->setWindowTitle("Recensione gioco \"calcolatrice\"");
+    video->setGeometry(30, 30, 640, 360);
+    video->setAttribute(Qt::WA_DeleteOnClose);
+
+    audio->setVolume(1);
+    audio->setParent(video);
+
+    player->play();
+    video->show();
+
+    QObject::connect(player, &QMediaPlayer::mediaStatusChanged, [video, player, audio](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::EndOfMedia) {
+            video->close();
+            player->deleteLater();
+            video->deleteLater();
+            audio->deleteLater();
+        }
+    });
+>>>>>>> Stashed changes
 }
