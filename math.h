@@ -4,12 +4,15 @@
 #pragma once
 #include <QObject>
 #include <QWidget>
+#include <QLabel>
+#include <QTextBrowser>
 #include <QMessageBox>
 #include <QMessageBox.h>
 
 #include <QMediaPlayer>
 #include <QVideoWidget>
 #include <QAudioOutput>
+#include <QFile>
 #include <QFileInfo>
 
 #include <vector>
@@ -58,12 +61,15 @@ private:
     std::vector<char> sign {'+'};   //The first sign is always a +. Signed operations arent supported (to write -5 you have to do +0-5)
 
     double result;      //Used by all calculator modes
+    long double highResResult;  //Sperimental
 
     bool newValue = false;      //Checks if a new numeric value has been inserted or the last sign has to be changed
     bool isDecimal = false;     //Check if the value has already decimal numbers. If true, the decimal point input is ignored
 
 
     //Parser-related functions
+    void handleResultStream();
+
     long double parseString(QString string);
     bool translateString(QString& string);
 
@@ -89,6 +95,7 @@ private:
     //Easter eggs
     void showEasterEgg1();
 
+    void genericHTMLBrowser(QString url);
     void genericVideoPlay(QString url); //Basic video player that takes an url as parameter. Display both video and audio.
 };
 #endif //MATH_H

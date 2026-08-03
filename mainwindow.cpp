@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->pushButton_potSquare, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('s');});
 
     QObject::connect(ui->pushButton_pi, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('P');});
+    QObject::connect(ui->pushButton_e, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('e');});
 
     //QObject::connect(ui->pushButton_anyRoot, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('R');});
     QObject::connect(ui->pushButton_sqrt, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('r');});
@@ -78,6 +79,11 @@ void MainWindow::updateDisplay(QString content, bool scientific)
     }
     else
     {
+        if(content.toDouble() > 1e14)
+            this->ui->warningBox->setText("Possibile perdita di precisione");
+        else if(content.toDouble() < 1e14)
+            this->ui->warningBox->clear();
+
         this->ui->calcDisplay->setText(content);
     }
 }
@@ -106,6 +112,7 @@ void MainWindow::updateScientificMode(bool scientific)
 
     this->ui->pushButton_potSquare->setEnabled(scientific);
     this->ui->pushButton_pi->setEnabled(scientific);
+    this->ui->pushButton_e->setEnabled(scientific);
 
     this->ui->pushButton_sqrt->setEnabled(scientific);
     //this->ui->pushButton_anyRoot->setEnabled(scientific);

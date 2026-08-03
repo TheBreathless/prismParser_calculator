@@ -83,7 +83,6 @@ void Math::testCalculateResult()
 
     for(int i = 0; i < this->registers.size(); i++)
     {
-
         switch(this->sign[i])
         {
         case '+':
@@ -194,7 +193,8 @@ void Math::registerCalculation(char value)
             break;
 
         case 'N':
-            this->msgCatanzaro();
+            genericHTMLBrowser(".\\Documentation\\index.html");
+            //this->msgCatanzaro();
             break;
 
         case '^':
@@ -243,6 +243,9 @@ void Math::scientificCalculation(char value)
             this->operationString.clear();
             this->operationString.append("INVALID REQUEST");
             break;
+        case 'e':
+            this->operationString.append('e');
+            break;
         case 'C':
             clearLast();
             break;
@@ -252,34 +255,12 @@ void Math::scientificCalculation(char value)
             break;
 
         case 'N':
-            msgHelp1();
+            genericHTMLBrowser(".\\Documentation\\index.html");
+            //msgHelp1();
             break;
 
         case '=':
-            for(int i = 0; i < this->mismatchedP; mismatchedP--)   //Adds as many mismatched parentesys as necessary
-                operationString.append(")");
-
-            this->result = parseString(this->operationString);
-
-            if(this->operationString.contains("18*59") || this->operationString.contains("1062/0") || this->operationString.contains("1062÷0"))
-                showEasterEgg1();
-
-            if(this->divByZero)
-            {
-                this->operationString.assign("DIVISION BY 0");
-                this->divByZero = false;
-            }
-            else if(!this->isValid)
-            {
-                this->operationString.assign("SYNTAX ERROR");
-                this->isValid = true;
-            }
-            else if(std::isinf(result))
-                this->operationString.assign("MATH OVERFLOW");
-            else
-                this->operationString.setNum(result);
-
-            emit contentUpdated(this->operationString, this->scientific);
+            handleResultStream();
 
             break;
         }
@@ -302,6 +283,10 @@ void Math::scientificCalculation(char value)
                 if(!this->operationString.isEmpty())
                     this->operationString.append("^2");
                 break;
+            case 'e':
+                if(!operationString.isEmpty())
+                    this->operationString.append('e');
+                break;
             default:
                 qDebug() << "The char is a sign, but it's not handled";
             }
@@ -312,17 +297,64 @@ void Math::scientificCalculation(char value)
     }
 }
 
+void Math::handleResultStream()
+{
+    for(int i = 0; i < this->mismatchedP; mismatchedP--)   //Adds as many mismatched parentesys as necessary
+        operationString.append(")");
+
+    //this->result = parseString(this->operationString);
+    this->highResResult = parseString(this->operationString);
+
+    if(this->operationString.contains("18*59") || this->operationString.contains("1062/0") || this->operationString.contains("1062÷0"))
+        showEasterEgg1();
+
+    if(this->divByZero)
+    {
+        this->operationString.assign("DIVISION BY 0");
+        this->divByZero = false;
+    }
+    else if(!this->isValid)
+    {
+        this->operationString.assign("SYNTAX ERROR");
+        this->isValid = true;
+    }
+    else if(std::isinf(highResResult))
+        this->operationString.assign("MATH OVERFLOW");
+    else
+        this->operationString.setNum((double)highResResult);
+        //this->operationString.assign(std::to_string(highResResult));
+
+    emit contentUpdated(this->operationString, this->scientific);
+
+}
+
+
 bool Math::translateString(QString& string)
 {
     for(int i = 0; i < string.length(); i++)
     {
         if(string.at(i) == "e")     //If statement necessary since switch doesnt accept QStrings and QChars and their toLatin1 conversions cause data loss for >1 byte chars
         {
-            if(i + 1 < string.length() && string.at(i+1) == '+')
+            if(i + 1 < string.length())
             {
+                //bool replaceSum;
                 //Example 5e+15 -> 5*10^15
-                string.replace(i + 1, 1, "10^");
-                string.replace(i, 1, '*');
+                //5e+10     5e10 -> 5*10^
+
+
+                if(string.at(i+1) == '+')
+                {
+                    //replaceSum = true;
+                    //string.replace(i, 1, '*');
+                    string.replace(i, 2, "*10^");
+                }
+                else if(string.at(i+1).isDigit())
+                {
+                    //replaceSum = false;
+                    //string.insert(i, '*');
+                    string.replace(i, 1, "*10^");
+                }
+                //string.replace(i, 1, "10^");
             }
             else
                 return false;   //The e is not written correctly
@@ -431,7 +463,7 @@ long double Math::parseString(QString originalString)
 
 bool Math::isSign(char c)
 {
-    std::string validSigns = "+-*/%^()s";
+    std::string validSigns = "+-*/%^()se";
 
     return validSigns.find(c) != std::string::npos;
 }
@@ -606,7 +638,7 @@ void Math::showEasterEgg1()
     player->setSource(QUrl::fromLocalFile(".\\CalcGameReview.media"));
 
     video->setWindowTitle("Recensione gioco \"calcolatrice\"");
-    video->setGeometry(30, 30, 640, 360);
+    video->setGeometry(50, 50, 640, 360);
     video->setAttribute(Qt::WA_DeleteOnClose);  //Delete object to prevent memory leak when window is closed
 
     audio->setVolume(1);
@@ -625,8 +657,22 @@ void Math::showEasterEgg1()
     });
 }
 
+void Math::genericHTMLBrowser(QString url)
+{
+    QTextBrowser *browser = new QTextBrowser();
 
-void genericVideoPlay(QString url)
+    browser->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    browser->setAttribute(Qt::WA_DeleteOnClose);
+
+    browser->setGeometry(120, 120, 400, 650);
+
+    browser->setSource(QUrl::fromLocalFile(url));
+    browser->show();
+}
+
+
+
+void Math::genericVideoPlay(QString url)
 {
     QMediaPlayer *player = new QMediaPlayer();
     QVideoWidget *video = new QVideoWidget();
