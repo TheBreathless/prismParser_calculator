@@ -1,4 +1,5 @@
 #include "math.h"
+#include "scientificEngine.h"
 
 Math::Math(QObject *parent): QObject(parent)    //Costruttore classe Math
 {
@@ -217,7 +218,7 @@ void Math::scientificCalculation(char value)
 
         this->newValue = false; //A sign can be added to the string, since now there would be a number behind it
 
-        if(value == '(')    //Small check to prevent mismatched parentesys. The final check happens at the = press
+        if(value == '(')        //Small check to prevent mismatched parentesys. The final check happens at the = press
             this->mismatchedP++;
         else if(value == ')')
             this->mismatchedP--;
@@ -260,8 +261,7 @@ void Math::scientificCalculation(char value)
             break;
 
         case '=':
-            handleResultStream();
-
+            //handleResultStream();
             break;
         }
     }
@@ -302,11 +302,12 @@ void Math::handleResultStream()
     for(int i = 0; i < this->mismatchedP; mismatchedP--)   //Adds as many mismatched parentesys as necessary
         operationString.append(")");
 
-    //this->result = parseString(this->operationString);
     this->highResResult = parseString(this->operationString);
 
-    if(this->operationString.contains("18*59") || this->operationString.contains("1062/0") || this->operationString.contains("1062÷0"))
-        showEasterEgg1();
+    if(this->operationString.contains("18*59"))
+        showEasterEgg1(true);
+    else if(this->operationString.contains("1062/0") || this->operationString.contains("1062÷0"))
+        showEasterEgg1(false);
 
     if(this->divByZero)
     {
@@ -324,8 +325,7 @@ void Math::handleResultStream()
         this->operationString.setNum((double)highResResult);
         //this->operationString.assign(std::to_string(highResResult));
 
-    emit contentUpdated(this->operationString, this->scientific);
-
+    //emit contentUpdated(this->operationString, this->scientific);
 }
 
 
@@ -337,24 +337,14 @@ bool Math::translateString(QString& string)
         {
             if(i + 1 < string.length())
             {
-                //bool replaceSum;
-                //Example 5e+15 -> 5*10^15
-                //5e+10     5e10 -> 5*10^
-
-
                 if(string.at(i+1) == '+')
                 {
-                    //replaceSum = true;
-                    //string.replace(i, 1, '*');
                     string.replace(i, 2, "*10^");
                 }
                 else if(string.at(i+1).isDigit())
                 {
-                    //replaceSum = false;
-                    //string.insert(i, '*');
                     string.replace(i, 1, "*10^");
                 }
-                //string.replace(i, 1, "10^");
             }
             else
                 return false;   //The e is not written correctly
@@ -369,18 +359,15 @@ bool Math::translateString(QString& string)
             if(i > 0 && std::isdigit(string.at(i - 1).toLatin1()))
                 string.insert(i, '*');
         }
-        /*
-        else if(string.at(i) == "²")
-        {
-            string.replace(i, 2, "^");
-        }
-        */
         else if(string.at(i) == "÷")
             string.replace(i, 1, '/');
+        else if(!std::isdigit(string.at(i).toLatin1()) && !this->isSign(string.at(i).toLatin1()))
+            return false;
     }
 
-    string.replace("²√(", "(");
-    string.replace(")", ")^(1/2)");
+
+    //string.replace("²√(", "(");
+    //string.replace(")", ")^(1/2)");
 
     return true;
 }
@@ -400,6 +387,9 @@ long double Math::parseString(QString originalString)
     short int notMatchingP = 0;
     short int openedP = 0;
     short int closedP = 0;
+
+    if(!this->isValid)
+        return 0;
 
     for(char c: stdString)
     {
@@ -626,7 +616,7 @@ void Math::msgHelp1()
 }
 
 ///Easter eggs
-void Math::showEasterEgg1()
+void Math::showEasterEgg1(bool fullVersion)
 {
     QMediaPlayer *player = new QMediaPlayer();
     QVideoWidget *video = new QVideoWidget();
@@ -635,7 +625,7 @@ void Math::showEasterEgg1()
     player->setVideoOutput(video);
     player->setAudioOutput(audio);
     player->setParent(video);
-    player->setSource(QUrl::fromLocalFile(".\\CalcGameReview.media"));
+    player->setSource(QUrl::fromLocalFile(".\\CalcGameReviewITA.media"));
 
     video->setWindowTitle("Recensione gioco \"calcolatrice\"");
     video->setGeometry(50, 50, 640, 360);
@@ -646,6 +636,19 @@ void Math::showEasterEgg1()
 
     player->play();
     video->show();
+
+    int timer = 29750;
+
+    if(fullVersion)
+        timer = 0;
+
+    QObject::connect(player,&QMediaPlayer::mediaStatusChanged,this,[=](QMediaPlayer::MediaStatus status)
+    {
+        if(status==QMediaPlayer::MediaStatus::BufferedMedia)
+        {
+            player->setPosition(timer);
+        }
+    });
 
     QObject::connect(player, &QMediaPlayer::mediaStatusChanged, [video, player, audio](QMediaPlayer::MediaStatus status) {
         if (status == QMediaPlayer::EndOfMedia) {

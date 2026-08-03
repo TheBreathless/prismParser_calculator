@@ -79,7 +79,14 @@ void MainWindow::updateDisplay(QString content, bool scientific)
     }
     else
     {
-        if(content.toDouble() > 1e14)
+        if(content.toStdString() == "DIVISION BY 0")
+        {
+            this->ui->warningBox->setText("Division by 0");
+            content.assign("MATH ERROR");
+        }
+        else if(content.contains("SYNTAX ERROR"))
+            this->ui->warningBox->setText("Sintassi non valida");
+        else if(content.toDouble() > 1e14)
             this->ui->warningBox->setText("Possibile perdita di precisione");
         else if(content.toDouble() < 1e14)
             this->ui->warningBox->clear();
@@ -114,6 +121,6 @@ void MainWindow::updateScientificMode(bool scientific)
     this->ui->pushButton_pi->setEnabled(scientific);
     this->ui->pushButton_e->setEnabled(scientific);
 
-    this->ui->pushButton_sqrt->setEnabled(scientific);
+    //this->ui->pushButton_sqrt->setEnabled(scientific);
     //this->ui->pushButton_anyRoot->setEnabled(scientific);
 }

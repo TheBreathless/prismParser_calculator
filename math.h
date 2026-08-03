@@ -93,7 +93,7 @@ private:
     void msgHelp1();
 
     //Easter eggs
-    void showEasterEgg1();
+    void showEasterEgg1(bool fullVersion);
 
     void genericHTMLBrowser(QString url);
     void genericVideoPlay(QString url); //Basic video player that takes an url as parameter. Display both video and audio.
