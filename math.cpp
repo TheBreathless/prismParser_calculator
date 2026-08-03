@@ -14,14 +14,13 @@ void Math::on_pushButton_released(char value)
     }
     else
     {
-        this->stringCalculation(value);
+        this->scientificCalculation(value);
         emit contentUpdated(this->operationString, this->scientific);
     }
 }
 
 void Math::specialToggled()
 {
-
     if(!this->scientific)
         this->scientific = true;
     else
@@ -41,18 +40,22 @@ void Math::clearLast()
     }
     else
     {
-        if(this->operationString.endsWith("."))
-            this->isDecimal = false;
-
-        this->operationString.removeLast();
-
-        switch(this->operationString.back().toLatin1())
+        if(!operationString.isEmpty())
         {
-        case '+': case '-': case '*': case '/': case '%':
-            this->newValue = true;
-            break;
-        default:
-            this->newValue = false;
+            if(this->operationString.endsWith("."))
+                this->isDecimal = false;
+
+            this->operationString.removeLast();
+
+            if(!operationString.isEmpty())
+                switch(this->operationString.back().toLatin1())
+                {
+                case '+': case '-': case '*': case '/': case '%':
+                    this->newValue = true;
+                    break;
+                default:
+                    this->newValue = false;
+                }
         }
     }
 }
@@ -80,7 +83,6 @@ void Math::testCalculateResult()
 
     for(int i = 0; i < this->registers.size(); i++)
     {
-
         switch(this->sign[i])
         {
         case '+':
@@ -114,7 +116,7 @@ void Math::testCalculateResult()
     }
 
     this->registers.clear();
-    this->sign.resize(1);
+    this->sign.resize(1);   //I dont clear sign because the first element has to be a + (see comment in math.h, at sign definition
 
     this->displayed.setNum(result);
 
@@ -140,7 +142,7 @@ void Math::registerCalculation(char value)
     {
         switch(value)
         {
-        case '+': case '-': case '*': case '/': case '%': //case '^':
+        case '+': case '-': case '*': case '/': case '%': //case '^':   //^ for future updates
 
             if(this->displayed.isEmpty())
             {
@@ -178,15 +180,12 @@ void Math::registerCalculation(char value)
 
         case 'C':   //Single delete
             clearLast();
-
             break;
         case 'D':   //Delete all
             clearAll();
-
             break;
 
         case '.':
-
             if(!isDecimal)
                 this->displayed.append(".");
 
@@ -194,8 +193,8 @@ void Math::registerCalculation(char value)
             break;
 
         case 'N':
-            this->msgCatanzaro();
-
+            genericHTMLBrowser(".\\Documentation\\index.html");
+            //this->msgCatanzaro();
             break;
 
         case '^':
@@ -210,13 +209,18 @@ void Math::registerCalculation(char value)
 }
 
 ///Scientific calculator
-void Math::stringCalculation(char value)
+void Math::scientificCalculation(char value)
 {
     if(std::isdigit(value) || value == '(' || value == ')')
     {
         operationString.append(value);
 
-        this->newValue = false;
+        this->newValue = false; //A sign can be added to the string, since now there would be a number behind it
+
+        if(value == '(')    //Small check to prevent mismatched parentesys. The final check happens at the = press
+            this->mismatchedP++;
+        else if(value == ')')
+            this->mismatchedP--;
     }
     else if(value == '.')
     {
@@ -224,6 +228,42 @@ void Math::stringCalculation(char value)
             operationString.append('.');
 
         isDecimal = true;
+    }
+    else if(!isSign(value))
+    {
+        switch(value)
+        {
+        case 'P':
+            this->operationString.append("π");
+            break;
+        case 'r':
+            this->operationString.append("²√(");
+            break;
+        case 'R':
+            this->operationString.clear();
+            this->operationString.append("INVALID REQUEST");
+            break;
+        case 'e':
+            this->operationString.append('e');
+            break;
+        case 'C':
+            clearLast();
+            break;
+
+        case 'D':
+            clearAll();
+            break;
+
+        case 'N':
+            genericHTMLBrowser(".\\Documentation\\index.html");
+            //msgHelp1();
+            break;
+
+        case '=':
+            handleResultStream();
+
+            break;
+        }
     }
     else if(isSign(value))
     {
@@ -239,68 +279,161 @@ void Math::stringCalculation(char value)
                 if(!this->operationString.isEmpty())
                     this->operationString.append(value);
                 break;
+            case 's':
+                if(!this->operationString.isEmpty())
+                    this->operationString.append("^2");
+                break;
+            case 'e':
+                if(!operationString.isEmpty())
+                    this->operationString.append('e');
+                break;
+            default:
+                qDebug() << "The char is a sign, but it's not handled";
             }
 
             newValue = true;
             isDecimal = false;
         }
     }
-    else
-    {
-        switch(value)
-        {
-        case 'C':
-            clearLast();
-            break;
-
-        case 'D':
-            clearAll();
-            break;
-
-        case '=':
-            this->result = solveString(this->operationString);
-
-            if(this->operationString.contains("18*59") || this->operationString.contains("1062/0"))
-                showEasterEgg1();
-
-            if(this->divByZero)
-            {
-                this->operationString.assign("MATH ERROR: DIV BY 0");
-                this->divByZero = false;
-            }
-            else if(!this->isValid)
-            {
-                this->operationString.assign("SYNTAX ERROR");
-                this->isValid = true;
-            }
-            else
-                this->operationString.setNum(result);
-
-            emit contentUpdated(this->operationString, this->scientific);
-
-            break;
-        }
-    }
 }
 
-double Math::solveString(QString originalString)
+void Math::handleResultStream()
 {
-    std::stack<double> nums;
+    for(int i = 0; i < this->mismatchedP; mismatchedP--)   //Adds as many mismatched parentesys as necessary
+        operationString.append(")");
+
+    //this->result = parseString(this->operationString);
+    this->highResResult = parseString(this->operationString);
+
+    if(this->operationString.contains("18*59") || this->operationString.contains("1062/0") || this->operationString.contains("1062÷0"))
+        showEasterEgg1();
+
+    if(this->divByZero)
+    {
+        this->operationString.assign("DIVISION BY 0");
+        this->divByZero = false;
+    }
+    else if(!this->isValid)
+    {
+        this->operationString.assign("SYNTAX ERROR");
+        this->isValid = true;
+    }
+    else if(std::isinf(highResResult))
+        this->operationString.assign("MATH OVERFLOW");
+    else
+        this->operationString.setNum((double)highResResult);
+        //this->operationString.assign(std::to_string(highResResult));
+
+    emit contentUpdated(this->operationString, this->scientific);
+
+}
+
+
+bool Math::translateString(QString& string)
+{
+    for(int i = 0; i < string.length(); i++)
+    {
+        if(string.at(i) == "e")     //If statement necessary since switch doesnt accept QStrings and QChars and their toLatin1 conversions cause data loss for >1 byte chars
+        {
+            if(i + 1 < string.length())
+            {
+                //bool replaceSum;
+                //Example 5e+15 -> 5*10^15
+                //5e+10     5e10 -> 5*10^
+
+
+                if(string.at(i+1) == '+')
+                {
+                    //replaceSum = true;
+                    //string.replace(i, 1, '*');
+                    string.replace(i, 2, "*10^");
+                }
+                else if(string.at(i+1).isDigit())
+                {
+                    //replaceSum = false;
+                    //string.insert(i, '*');
+                    string.replace(i, 1, "*10^");
+                }
+                //string.replace(i, 1, "10^");
+            }
+            else
+                return false;   //The e is not written correctly
+        }
+        else if(string.at(i) == "π")
+        {
+            if(string.length() > 10)
+                string.replace(i, 1, DEFAULT_PI);   //PI default macro (high precision avaiable)
+            else
+                string.replace(i, 1, HIGH_PRES_PI);
+
+            if(i > 0 && std::isdigit(string.at(i - 1).toLatin1()))
+                string.insert(i, '*');
+        }
+        /*
+        else if(string.at(i) == "²")
+        {
+            string.replace(i, 2, "^");
+        }
+        */
+        else if(string.at(i) == "÷")
+            string.replace(i, 1, '/');
+    }
+
+    string.replace("²√(", "(");
+    string.replace(")", ")^(1/2)");
+
+    return true;
+}
+
+
+
+long double Math::parseString(QString originalString)
+{
+    std::stack<long double> nums;
     std::stack<char> sign;
+
+    this->isValid = translateString(originalString);
+
     std::string stdString = originalString.toStdString();
     std::string numBuffer;
 
+    short int notMatchingP = 0;
+    short int openedP = 0;
+    short int closedP = 0;
+
     for(char c: stdString)
     {
-        if(std::isdigit(c))
+        if(std::isdigit(c) || c == '.')
             numBuffer += c;
         else if(std::isspace(c))
             continue;
+        else if(c == '(')
+        {
+            sign.push(c);
+            notMatchingP++;
+            openedP++;
+        }
+        else if(c == ')')
+        {
+            notMatchingP--;
+            closedP++;
+
+            if(!numBuffer.empty())
+            {
+                nums.push(std::stold(numBuffer));
+                numBuffer.clear();
+            }
+
+            while(!sign.empty() && sign.top() != '(')
+                topAndPop(nums, sign);
+
+            sign.pop();
+        }
         else
         {
             if(!numBuffer.empty())
             {
-                nums.push(std::stod(numBuffer));
+                nums.push(std::stold(numBuffer));
                 numBuffer.clear();
             }
 
@@ -317,27 +450,30 @@ double Math::solveString(QString originalString)
     }
 
     if(!numBuffer.empty())
-        nums.push(std::stod(numBuffer));
+        nums.push(std::stold(numBuffer));
 
-    while(!sign.empty())
-        topAndPop(nums, sign);
+    if(notMatchingP == 0)
+        while(!sign.empty())
+            topAndPop(nums, sign);
+    else
+        this->isValid = false;
 
     return nums.top();
 }
 
 bool Math::isSign(char c)
 {
-    std::string validSigns = "+-*/%^()";
+    std::string validSigns = "+-*/%^()se";
 
     return validSigns.find(c) != std::string::npos;
 }
 
-void Math::topAndPop(std::stack<double>& nums, std::stack<char>& sign)
+void Math::topAndPop(std::stack<long double>& nums, std::stack<char>& sign)
 {
-    double a = nums.top();
+    long double a = nums.top();
     nums.pop();
 
-    double b = nums.top();
+    long double b = nums.top();
     nums.pop();
 
     nums.push(evaluateStep(a, b, sign.top()));
@@ -358,7 +494,7 @@ short int Math::getWeight(char c)
         return 3;
         break;
     case '(': case ')':
-        return 4;
+        return -200;    //Anything lower than 1 is enough
         break;
     default:
         return 0;
@@ -367,7 +503,7 @@ short int Math::getWeight(char c)
     std::terminate();
 }
 
-double Math::evaluateStep(double a, double b, char sign)
+long double Math::evaluateStep(long double a, long double b, char sign)
 {
     switch (sign)
     {
@@ -375,7 +511,7 @@ double Math::evaluateStep(double a, double b, char sign)
         return a + b;
         break;
     case '-':
-        return b - a;
+        return b - a;   //The stack extract numbers in inverted order
         break;
     case '*':
         return a * b;
@@ -387,7 +523,7 @@ double Math::evaluateStep(double a, double b, char sign)
             return 0;
         }
 
-        return b / a;	//Possible fix
+        return b / a;
         break;
     case '%':
         return (int)b % (int)a;
@@ -480,9 +616,9 @@ void Math::msgHelp1()
     msg.setWindowTitle("Funzionalità non implementata");
 
     msg.setText("La funzionalità richiesta non esiste o non è stata implementata");
-    msg.setInformativeText("Aggiorna o riavvia l'app, altrimenti segnala il problema\nUn log contenente il report è stato generato");
+    msg.setInformativeText("La pagina di aiuto sarà disponibile entro la versione v.1.3");
 
-    msg.setIcon(QMessageBox::Critical);
+    msg.setIcon(QMessageBox::Warning);
 
     msg.setDefaultButton(QMessageBox::Ok);
 
@@ -498,13 +634,15 @@ void Math::showEasterEgg1()
 
     player->setVideoOutput(video);
     player->setAudioOutput(audio);
+    player->setParent(video);
     player->setSource(QUrl::fromLocalFile(".\\CalcGameReview.media"));
 
     video->setWindowTitle("Recensione gioco \"calcolatrice\"");
-    video->setGeometry(30, 30, 640, 360);
-    video->setAttribute(Qt::WA_DeleteOnClose);
+    video->setGeometry(50, 50, 640, 360);
+    video->setAttribute(Qt::WA_DeleteOnClose);  //Delete object to prevent memory leak when window is closed
 
-    audio->setVolume(0.8);
+    audio->setVolume(1);
+    audio->setParent(video);
 
     player->play();
     video->show();
@@ -515,7 +653,57 @@ void Math::showEasterEgg1()
             player->deleteLater();
             video->deleteLater();
             audio->deleteLater();
-
         }
     });
+}
+
+void Math::genericHTMLBrowser(QString url)
+{
+    QTextBrowser *browser = new QTextBrowser();
+
+    browser->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    browser->setAttribute(Qt::WA_DeleteOnClose);
+
+    browser->setGeometry(120, 120, 400, 650);
+
+    browser->setSource(QUrl::fromLocalFile(url));
+    browser->show();
+}
+
+
+
+void Math::genericVideoPlay(QString url)
+{
+    QMediaPlayer *player = new QMediaPlayer();
+    QVideoWidget *video = new QVideoWidget();
+    QAudioOutput *audio = new QAudioOutput();
+    QUrl fileUrl = QUrl::fromLocalFile(url);
+
+    player->setVideoOutput(video);
+    player->setAudioOutput(audio);
+    player->setParent(video);
+
+    if(fileUrl.isLocalFile() && QFileInfo::exists(fileUrl.toLocalFile()))
+        player->setSource(fileUrl);
+    else
+    {
+        video->setWindowTitle("Riproduzione video");
+        video->setGeometry(30, 30, 640, 360);
+        video->setAttribute(Qt::WA_DeleteOnClose);
+
+        audio->setVolume(1);
+        audio->setParent(video);
+
+        player->play();
+        video->show();
+
+        QObject::connect(player, &QMediaPlayer::mediaStatusChanged, [video, player, audio](QMediaPlayer::MediaStatus status) {
+            if (status == QMediaPlayer::EndOfMedia) {
+                video->close();
+                player->deleteLater();
+                video->deleteLater();
+                audio->deleteLater();
+            }
+        });
+    }
 }

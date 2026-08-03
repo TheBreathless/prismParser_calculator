@@ -1,0 +1,35 @@
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentazione calcolatrice pazzurda</title>
+</head>
+<body>
+    <div id="1">
+        <h1>Per iniziare</h1>
+        <p>
+            La calcolatrice è in grado di fare i calcoli in due modalità: lineare e scientifica.<br>
+            La modalità lineare è quella attiva al momento dell'avvio dell'appplicazione, e salva i numeri ed i segni non appena vengono inseriti.<br>
+            La modalità scientifica si attiva col tasto ADV e salva l'operazione progressivamente su un'unica stringa, per poi interpretarla ed elaborare il risultato<br>
+        </p>
+    </div>
+
+    <div id="1">
+        <h2>Calcolatrice lineare</h2>
+        <p>
+            Ogni numero è di tipo double ed è memorizzato su un vettore a dimensione variabile.<br>
+            I segni sono memorizzati su un vettore di tipo char.<br>
+            Il risultato è un long double (16 byte anzichè 8 dei double) per garantire precisione con almeno 17 cifre
+        </p>
+        <p>
+            Le operazioni vengono svolte sequenzialmente, quindi l'ordine delle operazioni non viene rispettato. Per esempio, 2+3x5 genera 25 come risultato al posto di 17.
+        </p>
+    </div>
+
+    <footer>
+        <br><br><br>
+        Da finire<br>
+        Aggiornato alla versione 1.1 della calcolatrice
+    </footer>
+
+</html>
