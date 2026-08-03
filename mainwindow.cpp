@@ -49,8 +49,10 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->pushButton_pot, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('^');});
     QObject::connect(ui->pushButton_potSquare, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('s');});
 
+    QObject::connect(ui->pushButton_pi, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('P');});
+
     //QObject::connect(ui->pushButton_anyRoot, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('R');});
-    //QObject::connect(ui->pushButton_sqrt, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('r');});
+    QObject::connect(ui->pushButton_sqrt, &QPushButton::released, ptr_Math, [this]() {ptr_Math->on_pushButton_released('r');});
 
     QObject::connect(ui->pushButton_s, &QPushButton::toggled, [this]() {ptr_Math->specialToggled();});  //Scientific calculator toggler
 
@@ -87,23 +89,24 @@ void MainWindow::updateScientificMode(bool scientific)
         this->ui->calcDisplay->hide();
         this->ui->lcdNumberOld->show();
 
-        this->ui->pushButton_openParentesys->setEnabled(false);
-        this->ui->pushButton_closeParentesys->setEnabled(false);
         this->ui->pushButton_s->setText("NORMAL");
         this->ui->pushButton_s->setStyleSheet("background-color: rgb(131, 98, 0)");
-
-        this->ui->pushButton_potSquare->setEnabled(false);
     }
     else
     {
         this->ui->calcDisplay->show();
         this->ui->lcdNumberOld->hide();
 
-        this->ui->pushButton_openParentesys->setEnabled(true);
-        this->ui->pushButton_closeParentesys->setEnabled(true);
         this->ui->pushButton_s->setText("ADV");
         this->ui->pushButton_s->setStyleSheet("background-color:green");
-
-        this->ui->pushButton_potSquare->setEnabled(true);
     }
+
+    this->ui->pushButton_openParentesys->setEnabled(scientific);
+    this->ui->pushButton_closeParentesys->setEnabled(scientific);
+
+    this->ui->pushButton_potSquare->setEnabled(scientific);
+    this->ui->pushButton_pi->setEnabled(scientific);
+
+    this->ui->pushButton_sqrt->setEnabled(scientific);
+    //this->ui->pushButton_anyRoot->setEnabled(scientific);
 }

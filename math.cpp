@@ -14,14 +14,13 @@ void Math::on_pushButton_released(char value)
     }
     else
     {
-        this->stringCalculation(value);
+        this->scientificCalculation(value);
         emit contentUpdated(this->operationString, this->scientific);
     }
 }
 
 void Math::specialToggled()
 {
-
     if(!this->scientific)
         this->scientific = true;
     else
@@ -210,7 +209,7 @@ void Math::registerCalculation(char value)
 }
 
 ///Scientific calculator
-void Math::stringCalculation(char value)
+void Math::scientificCalculation(char value)
 {
     if(std::isdigit(value) || value == '(' || value == ')')
     {
@@ -230,35 +229,20 @@ void Math::stringCalculation(char value)
 
         isDecimal = true;
     }
-
-    else if(isSign(value))
-    {
-        if(!newValue)
-        {
-            switch(value)
-            {
-            case '+': case '-':
-                if(!this->operationString.isEmpty())    //The parser is not ready yet for signed numbers (ex. -5 or +3, but allows 0-5 or just 3)
-                    this->operationString.append(value);
-                break;
-            case '*': case '/': case '%': case '^':
-                if(!this->operationString.isEmpty())
-                    this->operationString.append(value);
-                break;
-            case 's':
-                if(!this->operationString.isEmpty())
-                    this->operationString.append("^2");
-                break;
-            }
-
-            newValue = true;
-            isDecimal = false;
-        }
-    }
-    else
+    else if(!isSign(value))
     {
         switch(value)
         {
+        case 'P':
+            this->operationString.append("π");
+            break;
+        case 'r':
+            this->operationString.append("²√(");
+            break;
+        case 'R':
+            this->operationString.clear();
+            this->operationString.append("INVALID REQUEST");
+            break;
         case 'C':
             clearLast();
             break;
@@ -275,7 +259,7 @@ void Math::stringCalculation(char value)
             for(int i = 0; i < this->mismatchedP; mismatchedP--)   //Adds as many mismatched parentesys as necessary
                 operationString.append(")");
 
-            this->result = solveString(this->operationString);
+            this->result = parseString(this->operationString);
 
             if(this->operationString.contains("18*59") || this->operationString.contains("1062/0") || this->operationString.contains("1062÷0"))
                 showEasterEgg1();
@@ -300,12 +284,84 @@ void Math::stringCalculation(char value)
             break;
         }
     }
+    else if(isSign(value))
+    {
+        if(!newValue)
+        {
+            switch(value)
+            {
+            case '+': case '-':
+                if(!this->operationString.isEmpty())    //The parser is not ready yet for signed numbers (ex. -5 or +3, but allows 0-5 or just 3)
+                    this->operationString.append(value);
+                break;
+            case '*': case '/': case '%': case '^':
+                if(!this->operationString.isEmpty())
+                    this->operationString.append(value);
+                break;
+            case 's':
+                if(!this->operationString.isEmpty())
+                    this->operationString.append("^2");
+                break;
+            default:
+                qDebug() << "The char is a sign, but it's not handled";
+            }
+
+            newValue = true;
+            isDecimal = false;
+        }
+    }
 }
 
-double Math::solveString(QString originalString)
+bool Math::translateString(QString& string)
 {
-    std::stack<double> nums;
+    for(int i = 0; i < string.length(); i++)
+    {
+        if(string.at(i) == "e")     //If statement necessary since switch doesnt accept QStrings and QChars and their toLatin1 conversions cause data loss for >1 byte chars
+        {
+            if(i + 1 < string.length() && string.at(i+1) == '+')
+            {
+                //Example 5e+15 -> 5*10^15
+                string.replace(i + 1, 1, "10^");
+                string.replace(i, 1, '*');
+            }
+            else
+                return false;   //The e is not written correctly
+        }
+        else if(string.at(i) == "π")
+        {
+            if(string.length() > 10)
+                string.replace(i, 1, DEFAULT_PI);   //PI default macro (high precision avaiable)
+            else
+                string.replace(i, 1, HIGH_PRES_PI);
+
+            if(i > 0 && std::isdigit(string.at(i - 1).toLatin1()))
+                string.insert(i, '*');
+        }
+        /*
+        else if(string.at(i) == "²")
+        {
+            string.replace(i, 2, "^");
+        }
+        */
+        else if(string.at(i) == "÷")
+            string.replace(i, 1, '/');
+    }
+
+    string.replace("²√(", "(");
+    string.replace(")", ")^(1/2)");
+
+    return true;
+}
+
+
+
+long double Math::parseString(QString originalString)
+{
+    std::stack<long double> nums;
     std::stack<char> sign;
+
+    this->isValid = translateString(originalString);
+
     std::string stdString = originalString.toStdString();
     std::string numBuffer;
 
@@ -315,7 +371,7 @@ double Math::solveString(QString originalString)
 
     for(char c: stdString)
     {
-        if(std::isdigit(c))
+        if(std::isdigit(c) || c == '.')
             numBuffer += c;
         else if(std::isspace(c))
             continue;
@@ -332,7 +388,7 @@ double Math::solveString(QString originalString)
 
             if(!numBuffer.empty())
             {
-                nums.push(std::stod(numBuffer));
+                nums.push(std::stold(numBuffer));
                 numBuffer.clear();
             }
 
@@ -345,7 +401,7 @@ double Math::solveString(QString originalString)
         {
             if(!numBuffer.empty())
             {
-                nums.push(std::stod(numBuffer));
+                nums.push(std::stold(numBuffer));
                 numBuffer.clear();
             }
 
@@ -362,7 +418,7 @@ double Math::solveString(QString originalString)
     }
 
     if(!numBuffer.empty())
-        nums.push(std::stod(numBuffer));
+        nums.push(std::stold(numBuffer));
 
     if(notMatchingP == 0)
         while(!sign.empty())
@@ -375,17 +431,17 @@ double Math::solveString(QString originalString)
 
 bool Math::isSign(char c)
 {
-    std::string validSigns = "+-*/%^()Rrs";
+    std::string validSigns = "+-*/%^()s";
 
     return validSigns.find(c) != std::string::npos;
 }
 
-void Math::topAndPop(std::stack<double>& nums, std::stack<char>& sign)
+void Math::topAndPop(std::stack<long double>& nums, std::stack<char>& sign)
 {
-    double a = nums.top();
+    long double a = nums.top();
     nums.pop();
 
-    double b = nums.top();
+    long double b = nums.top();
     nums.pop();
 
     nums.push(evaluateStep(a, b, sign.top()));
@@ -415,7 +471,7 @@ short int Math::getWeight(char c)
     std::terminate();
 }
 
-double Math::evaluateStep(double a, double b, char sign)
+long double Math::evaluateStep(long double a, long double b, char sign)
 {
     switch (sign)
     {
@@ -423,7 +479,7 @@ double Math::evaluateStep(double a, double b, char sign)
         return a + b;
         break;
     case '-':
-        return b - a;
+        return b - a;   //The stack extract numbers in inverted order
         break;
     case '*':
         return a * b;
@@ -435,7 +491,7 @@ double Math::evaluateStep(double a, double b, char sign)
             return 0;
         }
 
-        return b / a;	//Possible fix
+        return b / a;
         break;
     case '%':
         return (int)b % (int)a;
@@ -530,7 +586,7 @@ void Math::msgHelp1()
     msg.setText("La funzionalità richiesta non esiste o non è stata implementata");
     msg.setInformativeText("La pagina di aiuto sarà disponibile entro la versione v.1.3");
 
-    msg.setIcon(QMessageBox::Critical);
+    msg.setIcon(QMessageBox::Warning);
 
     msg.setDefaultButton(QMessageBox::Ok);
 

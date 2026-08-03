@@ -19,6 +19,9 @@
 #include <cctype>
 #include <string>
 
+#define DEFAULT_PI "3.14159265"
+#define HIGH_PRES_PI "3.141592653589793"
+
 
 class Math: public QObject
 {
@@ -41,7 +44,7 @@ private:
     void testCalculateResult();     //Calculate results, only for debug //Update: its used for sequential operations
 
     void registerCalculation(char value);   //Used for default calculator mode, saves all values into registers
-    void stringCalculation(char value);     //>> for scientific >> mode, currently not finished
+    void scientificCalculation(char value);     //>> for scientific >> mode, currently not finished
 
     void clearLast();   //Clean last char
     void clearAll();    //Reset all registers and variables, both for scientific and non scientific mode
@@ -61,12 +64,13 @@ private:
 
 
     //Parser-related functions
-    double solveString(QString string);
+    long double parseString(QString string);
+    bool translateString(QString& string);
 
     short int getWeight(char c);
-    double evaluateStep(double a, double b, char sign);     //Calcola gli elementi passati per parametro, usato in combinazione con topAndPop(...)
+    long double evaluateStep(long double a, long double b, char sign);     //Calcola gli elementi passati per parametro, usato in combinazione con topAndPop(...)
 
-    void topAndPop(std::stack<double>& nums, std::stack<char>& sign);   //Codice contenuto in un paio di cicli while, legge e cancella gli elementi dello stack
+    void topAndPop(std::stack<long double>& nums, std::stack<char>& sign);   //Codice contenuto in un paio di cicli while, legge e cancella gli elementi dello stack
 
     bool isSign(char c);    //Controlla se c fa parte di un gruppo arbitrario di caratteri (i segni)
 
