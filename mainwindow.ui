@@ -328,6 +328,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>51</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="5" column="3">
@@ -397,6 +402,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>45</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="8" column="0">
@@ -443,6 +453,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>0</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -531,6 +546,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>56</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="7" column="1">
@@ -618,6 +638,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>48</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="7" column="2">
@@ -687,6 +712,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>46</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="7" column="0">
@@ -745,6 +775,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>83</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -821,6 +856,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>47</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="8" column="1">
@@ -868,6 +908,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>101</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="0" column="2">
@@ -914,6 +959,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>115</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -965,6 +1015,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>40</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="0" column="3">
@@ -1011,6 +1066,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>33</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -1099,6 +1159,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>55</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="4" column="1">
@@ -1186,6 +1251,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>50</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="8" column="2">
@@ -1245,6 +1315,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>80</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -1333,6 +1408,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>53</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="2" column="2">
@@ -1403,6 +1483,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>67</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="0" column="1">
@@ -1449,6 +1534,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>114</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -1509,6 +1599,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>0</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -1597,6 +1692,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>49</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="1" column="3">
@@ -1646,6 +1746,11 @@ QPushButton:pressed {
           </property>
           <property name="default">
            <bool>true</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>37</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -1716,6 +1821,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>68</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -1804,6 +1914,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>57</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="7" column="3">
@@ -1873,6 +1988,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>61</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="1" column="1">
@@ -1922,6 +2042,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>41</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -2010,6 +2135,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>54</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="1" column="2">
@@ -2065,6 +2195,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>94</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -2143,6 +2278,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>78</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -2231,6 +2371,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>52</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="0" column="0">
@@ -2277,6 +2422,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>82</unicode>
+           </char>
           </property>
          </widget>
         </item>
@@ -2365,6 +2515,11 @@ QPushButton:pressed {
           <property name="flat">
            <bool>false</bool>
           </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>43</unicode>
+           </char>
+          </property>
          </widget>
         </item>
         <item row="4" column="3">
@@ -2433,6 +2588,11 @@ QPushButton:pressed {
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+          <property name="value" stdset="0">
+           <char>
+            <unicode>42</unicode>
+           </char>
           </property>
          </widget>
         </item>

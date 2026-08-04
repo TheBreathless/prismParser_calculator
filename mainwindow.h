@@ -3,7 +3,8 @@
 
 #pragma once
 #include <QMainWindow>
-#include "math.h"
+
+class Math;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -28,7 +29,7 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-    Math *ptr_Math;
+    Math *ptr_Math = nullptr;
 
     QString contentDisplayed;
 };

@@ -4,19 +4,15 @@
 ScientificEngine::ScientificEngine() {}
 
 
-void ScientificEngine::handleResultStream(QString& opString)
+void ScientificEngine::handleResultStream(QString& opString, short int& mismatchedP)
 {
-    for(int i = 0; i < this->mismatchedP; mismatchedP--)   //Adds as many mismatched parentesys as necessary
+    if(opString.isEmpty())
+        return;
+
+    for(int i = 0; i < mismatchedP; mismatchedP--)   //Adds as many mismatched parentesys as necessary
         opString.append(")");
 
     this->highResResult = parseString(opString);
-
-    /*
-    if(opString.contains("18*59"))
-        showEasterEgg1(true);
-    else if(opString.contains("1062/0") || opString.contains("1062÷0"))
-        showEasterEgg1(false);
-    */
 
     if(this->divByZero)
     {
@@ -140,8 +136,8 @@ bool ScientificEngine::translateString(QString& string)
         }
         else if(string.at(i) == "÷")
             string.replace(i, 1, '/');
-        else if(!std::isdigit(string.at(i).toLatin1()) && !this->isSign(string.at(i).toLatin1()))
-            return false;
+        //else if(!std::isdigit(string.at(i).toLatin1()) && !this->isSign(string.at(i).toLatin1()))     //Bugged for powers
+        //    return false;
     }
 
 
