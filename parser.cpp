@@ -2,10 +2,39 @@
 
 #include <QDebug>
 
+
 Parser::Parser() {}
 
 
-long double Parser::mainParser(QString string)
+void Parser::handleCalculations(std::string& string, short int& mismatchedP)
+{
+    if(string.empty())
+        return;
+
+    for(int i = 0; i < mismatchedP; mismatchedP++)
+        string.append(")");
+
+    result = mainParser(string);
+
+    if(divByZero)
+        string.assign("DIVISION BY 0");
+    else if(!isValid)
+        string.assign("SYNTAX ERROR");
+    else if(std::isinf(result))
+        string.assign("STACK OVERFLOW");
+    else
+        string.assign(std::to_string(result));
+
+    string.erase(string.find_last_not_of('0') + 1, std::string::npos);
+
+    if (!string.empty() && string.back() == '.') {
+        string.pop_back();
+    }
+
+    qDebug() << "Result is" << result;
+}
+
+long double Parser::mainParser(std::string& string)
 {
     using LT = Parser::LexerTokens;
     using PT = Parser::ParserTokens;
@@ -76,7 +105,7 @@ long double Parser::mainParser(QString string)
 }
 
 
-std::vector<Parser::lexerData>Parser::mainLexer(QString expression)
+std::vector<Parser::lexerData>Parser::mainLexer(std::string expression)
 {
     using LT = Parser::LexerTokens;
 
@@ -88,11 +117,11 @@ std::vector<Parser::lexerData>Parser::mainLexer(QString expression)
 
     while(i < expression.length())
     {
-        if(std::isspace(expression.at(i).unicode()))
+        if(std::isspace(expression.at(i)))
             i++;
-        else if(std::isdigit(expression.at(i).unicode()))
+        else if(std::isdigit(expression.at(i)))
         {
-            numBuffer += expression.at(i).unicode();
+            numBuffer += expression.at(i);
             i++;
 
             if(skipNextSign)
@@ -108,7 +137,7 @@ std::vector<Parser::lexerData>Parser::mainLexer(QString expression)
             if(skipNextSign)
                 skipNextSign = false;
             else
-                switch(expression.at(i).unicode())
+                switch(expression.at(i))
                 {
                 case '+':
                     ltList.push_back({LT::SIGN_ADD});
@@ -178,7 +207,6 @@ int Parser::getPriority(const Parser::ParserTokens& pt)
         break;
 
     case PT::POW: case PT::ROOT: case PT::SQRT:
-        qDebug() << "Ottenuta priorita'";
         return 5;
         break;
 
@@ -202,7 +230,6 @@ int Parser::getPriority(const Parser::ParserTokens& pt)
         break;
     }
 
-    qDebug() << "invalid getpriority";
     isValid = false;
     return 0;
 }
@@ -261,7 +288,6 @@ Parser::ParserTokens Parser::convertTokens(const Parser::LexerTokens& pt, bool& 
         break;
 
     case LT::SQRT:
-        qDebug() << "SQRT convertito";
         return PT::SQRT;
         break;
 
@@ -278,7 +304,6 @@ Parser::ParserTokens Parser::convertTokens(const Parser::LexerTokens& pt, bool& 
         break;
 
     default:
-        qDebug() << "Il segno" << (int)pt << "non e' valido";
         return PT::INVALID;
     }
 
@@ -295,8 +320,6 @@ void Parser::evaluateStack(std::stack<long double>& nums, std::stack<Parser::Par
     {
         long double b = nums.top();
         nums.pop();
-
-        qDebug() << "Operation: " << (double)b << (int)sign.top() << (double)a;
 
         switch(sign.top())
         {
@@ -343,13 +366,9 @@ void Parser::evaluateStack(std::stack<long double>& nums, std::stack<Parser::Par
         }
     }
 
-    qDebug() << "Non sono morto";
-    qDebug() << "Segno:" << (int)sign.top();
-
     switch(sign.top())
     {
     case PT::SQRT:
-        qDebug() << "Operation: " << (int)sign.top() << (double)a;
         nums.push(std::sqrt(a));
         break;
 

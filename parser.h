@@ -1,8 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <QString>
-
+#include <vector>
+#include <string>
 #include <stack>
 #include <variant>
 
@@ -25,11 +25,11 @@ public:
 
     enum class ParserTokens {
         INVALID = -100,
-        E_NOT = 0,
         ADD = 1, SUB,
         MUL, DIV, MOD,
         POW, SQRT, ROOT,
         UNARY_PLUS, UNARY_MIN,
+        E_NOT,
         L_BRACKET, R_BRACKET
     };
 
@@ -38,16 +38,20 @@ public:
         std::variant<std::monostate, long double> value;
     };
 
-    long double mainParser(QString string);
+    void handleCalculations(std::string& string, short int& mismatchedP);
 
 private:
+    double result = 0.0;
+
     bool divByZero = false;
     bool isValid = true;
+
+    long double mainParser(std::string& string);
+    std::vector<lexerData>mainLexer(std::string expression);
 
     std::vector<lexerData> lexerTokenList;
     std::vector<ParserTokens> parserTokenList;
 
-    std::vector<lexerData>mainLexer(QString expression);
     ParserTokens convertTokens(const Parser::LexerTokens& pt, bool& expt_unary);
 
     int getPriority(const Parser::ParserTokens& lt);

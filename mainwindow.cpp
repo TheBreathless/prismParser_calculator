@@ -93,6 +93,6 @@ void MainWindow::updateScientificMode(bool scientific)
     this->ui->pushButton_pi->setEnabled(scientific);
     this->ui->pushButton_e->setEnabled(scientific);
 
-    //this->ui->pushButton_sqrt->setEnabled(scientific);
+    this->ui->pushButton_sqrt->setEnabled(scientific);
     //this->ui->pushButton_anyRoot->setEnabled(scientific);
 }

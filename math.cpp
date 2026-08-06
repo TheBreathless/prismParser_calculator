@@ -1,9 +1,11 @@
 #include "math.h"
+#include "parser.h"
 #include "scientificEngine.h"
 #include "mediaEngine.h"
 
 Math::Math(QObject *parent): QObject(parent)    //Costruttore classe Math
 {
+    parser_class = new Parser();
     scientificEngine_ptr = new ScientificEngine();
     mediaEngine_ptr = new MediaEngine();
 }
@@ -259,7 +261,15 @@ void Math::operateScientificMode(char value)
         case '=':
             mediaEngine_ptr->checkForEasterEggs(this->operationString);
 
-            scientificEngine_ptr->handleResultStream(this->operationString, this->mismatchedP);
+            std::string stdString = standardizeString(operationString);
+
+            qDebug() << "Stdstring is" << stdString << ", opstring is" << operationString;
+
+            parser_class->handleCalculations(stdString, mismatchedP);
+
+            operationString.assign(stdString);
+
+            //scientificEngine_ptr->handleResultStream(this->operationString, this->mismatchedP);
             break;
         }
     }
@@ -297,4 +307,40 @@ void Math::operateScientificMode(char value)
         if(this->bufferedSign == 1)
             this->isDecimal = false;
     }
+}
+
+
+
+std::string Math::standardizeString(const QString& string)
+{
+    std::string newString;
+
+    for (int i = 0; i < string.length(); i++)
+    {
+        if (string.at(i) == u'π')
+        {
+            newString.append("P");
+
+            if(i > 0 && std::isdigit(string.at(i-1).toLatin1()))
+                newString.insert(i-1, "*");
+        }
+        else if(string.at(i) == u'²')
+        {
+            if(i + 1 < string.length())
+            {
+                i++;
+
+                if(string.at(i) == u'√')
+                    newString.append("r");
+                else
+                    i--;
+            }
+        }
+        else if (string.at(i) == u'√')
+            newString.append("R");
+        else
+            newString.push_back(string.at(i).toLatin1());
+    }
+
+    return newString;
 }

@@ -6,9 +6,11 @@
 
 #include <vector>
 #include <fstream>
+#include <format>
 
 #include <cctype>
 
+class Parser;
 class ScientificEngine;
 class MediaEngine;
 
@@ -30,6 +32,7 @@ signals:
     void scientificToggled(bool scientific);
 
 private:
+    Parser *parser_class = nullptr;
     ScientificEngine *scientificEngine_ptr = nullptr;
     MediaEngine *mediaEngine_ptr = nullptr;
 
@@ -56,8 +59,8 @@ private:
     void clearLast();   //Clean last char
     void clearAll();    //Reset all registers and variables, both for scientific and non scientific mode
 
-    //bool isSign(char c);    //Controlla se c fa parte di un gruppo arbitrario di caratteri (i segni)
+    std::string standardizeString(const QString& string);
 
-    short int mismatchedP = 0;  //When a '(' is opened, this is incremented. When closed, it's decremented. If it's != 0, there is a parentesys mismatch (fix avaiable, see math.cpp)
+    short int mismatchedP = 0;  //When a '(' is opened, this is incremented. When closed, it's decremented. If it's != 0, there is a brackets mismatch (fix avaiable, see math.cpp)
 };
 #endif //MATH_H
