@@ -46,6 +46,8 @@ private:
     bool isDecimal = false;     //Check if the value has already decimal numbers. If true, the decimal point input is ignored
     bool scientific = false;    //Scientific flag, determine how the operations are saved and wich algorithm will be used to evaluate them
 
+    short int bufferedSign = 0;
+
     void evaluateRegisters();     //Calculate results, only for debug //Update: its used for sequential operations
 
     void registerCalculation(char value);       //Used for default calculator mode, saves all values into registers

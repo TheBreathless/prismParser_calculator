@@ -98,10 +98,12 @@ void Math::evaluateRegisters()
             result *= this->registers[i];
             break;
         case '/':
-            result /= this->registers[i];
+            if(this->registers[i] != 0)
+                result /= this->registers[i];
             break;
         case '%':
-            result = (int)result % (int)this->registers[i];
+            if(this->registers[i] != 0)
+                result = (int)result % (int)this->registers[i];
             break;
         case '^':
             qCritical() << "Function still not implemented";
@@ -211,6 +213,7 @@ void Math::operateScientificMode(char value)
         operationString.append(value);
 
         this->newValue = false; //A sign can be added to the string, since now there would be a number behind it
+        this->bufferedSign = 0;
 
         if(value == '(')        //Small check to prevent mismatched parentesys. The final check happens at the = press
             this->mismatchedP++;
@@ -262,32 +265,36 @@ void Math::operateScientificMode(char value)
     }
     else if(scientificEngine_ptr->isSign(value))
     {
-        if(!newValue)
+        switch(value)
         {
-            switch(value)
-            {
-            case '+': case '-':
-                if(!this->operationString.isEmpty())    //The parser is not ready yet for signed numbers (ex. -5 or +3, but allows 0-5 or just 3)
-                    this->operationString.append(value);
-                break;
-            case '*': case '/': case '%': case '^':
-                if(!this->operationString.isEmpty())
-                    this->operationString.append(value);
-                break;
-            case 's':
-                if(!this->operationString.isEmpty())
-                    this->operationString.append("^2");
-                break;
-            case 'e':
-                if(!operationString.isEmpty())
-                    this->operationString.append('e');
-                break;
-            default:
-                qDebug() << "The char is a sign, but it's not handled";
-            }
-
-            newValue = true;
-            isDecimal = false;
+        case '+': case '-':
+            if(this->bufferedSign < 2)
+                this->operationString.append(value);
+            break;
+        case '*': case '/': case '%': case '^':
+            if(!this->operationString.isEmpty() && this->bufferedSign < 1)
+                this->operationString.append(value);
+            else
+                return;
+            break;
+        case 's':
+            if(!this->operationString.isEmpty() && this->bufferedSign < 1)
+                this->operationString.append("^2");
+            else
+                return;
+            break;
+        case 'e':
+            if(!this->operationString.isEmpty() && this->bufferedSign < 1)
+                this->operationString.append('e');
+            else
+                return;
+            break;
+        default:
+            qDebug() << "The char is a sign, but it's not handled";
         }
+
+        this->bufferedSign++;
+        if(this->bufferedSign == 1)
+            this->isDecimal = false;
     }
 }

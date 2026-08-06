@@ -1,5 +1,5 @@
 #include "scientificEngine.h"
-//#include "math.cpp"     //<--
+#include <qDebug>
 
 ScientificEngine::ScientificEngine() {}
 
@@ -41,6 +41,8 @@ long double ScientificEngine::parseString(QString originalString)
     std::string stdString = originalString.toStdString();
     std::string numBuffer;
 
+    bool isNegative = false;
+    bool lastWasSign = false;
     short int notMatchingP = 0;
 
     if(!this->isValid)
@@ -48,8 +50,13 @@ long double ScientificEngine::parseString(QString originalString)
 
     for(char c: stdString)
     {
+        if(!this->isValid)
+            return 0;
+
         if(std::isdigit(c) || c == '.')
+        {
             numBuffer += c;
+        }
         else if(std::isspace(c))
             continue;
         else if(c == '(')
@@ -65,15 +72,21 @@ long double ScientificEngine::parseString(QString originalString)
             {
                 nums.push(std::stold(numBuffer));
                 numBuffer.clear();
+
+                if(isNegative)
+                    numBuffer.insert(0, 1, '-');
             }
 
             while(!sign.empty() && sign.top() != '(')
-                topAndPop(nums, sign);
+                this->isValid = topAndPop(nums, sign);
 
             sign.pop();
         }
         else
         {
+            if(nums.empty())    //Fix crashes when a sign is pushed before a num (ex -5+3)
+                nums.push(0);
+
             if(!numBuffer.empty())
             {
                 nums.push(std::stold(numBuffer));
@@ -84,24 +97,41 @@ long double ScientificEngine::parseString(QString originalString)
                 sign.push(c);
             else
             {
-                while(!nums.empty() && !sign.empty() && getWeight(sign.top()) >= getWeight(c))
-                    topAndPop(nums, sign);
+                if(lastWasSign && c == '-')
+                    isNegative = true;
+                else
+                {
+                    while(!nums.empty() && !sign.empty() && getWeight(sign.top()) >= getWeight(c))
+                        this->isValid = topAndPop(nums, sign);
 
-                sign.push(c);
+                    sign.push(c);
+
+                    lastWasSign = true;
+                    isNegative = false;
+
+                    continue;
+                }
+
+                this->isValid = false;  //Prevent random letters or bad inputs from being pushed into the stacks
             }
         }
-    }
+    }       //End of for cycle
 
     if(!numBuffer.empty())
         nums.push(std::stold(numBuffer));
 
-    if(notMatchingP == 0)
-        while(!sign.empty())
-            topAndPop(nums, sign);
+    if(notMatchingP == 0)       //Tries to evaluate the expression only if the brackets are matching
+        while(!sign.empty() && !nums.empty())
+            this->isValid = topAndPop(nums, sign);
     else
         this->isValid = false;
 
-    return nums.top();
+    if(!nums.empty())
+        return nums.top();
+    else
+        this->isValid = false;
+
+    return 0.0;
 }
 
 bool ScientificEngine::translateString(QString& string)
@@ -136,6 +166,8 @@ bool ScientificEngine::translateString(QString& string)
         }
         else if(string.at(i) == "÷")
             string.replace(i, 1, '/');
+
+        double x = M_PI_4;
         //else if(!std::isdigit(string.at(i).toLatin1()) && !this->isSign(string.at(i).toLatin1()))     //Bugged for powers
         //    return false;
     }
@@ -154,16 +186,21 @@ bool ScientificEngine::isSign(char c)
     return validSigns.find(c) != std::string::npos;
 }
 
-void ScientificEngine::topAndPop(std::stack<long double>& nums, std::stack<char>& sign)
+bool ScientificEngine::topAndPop(std::stack<long double>& nums, std::stack<char>& sign)
 {
     long double a = nums.top();
     nums.pop();
+
+    if(nums.empty() || sign.empty())
+        return false;
 
     long double b = nums.top();
     nums.pop();
 
     nums.push(evaluateStep(a, b, sign.top()));
     sign.pop();
+
+    return true;
 }
 
 short int ScientificEngine::getWeight(char c)
@@ -212,6 +249,12 @@ long double ScientificEngine::evaluateStep(long double a, long double b, char si
         return b / a;
         break;
     case '%':
+        if(a == 0)
+        {
+            this->divByZero = true;
+            return 0;
+        }
+
         return (int)b % (int)a;
         break;
     case '^':
